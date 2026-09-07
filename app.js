@@ -664,12 +664,31 @@ function initPayPalButtons() {
     }).render('#paypal-button-container');
 }
 
+// ==========================================
+// INTERACTIVE CURSOR GLOW SPOTLIGHT EFFECT
+// ==========================================
+function initCursorGlow() {
+    const cards = document.querySelectorAll('.glow-card');
+    if (!cards || cards.length === 0) return;
+
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+}
+
 // DOM Initialization
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
     updateUI();
     checkPaymentReturn();
     loadPayPalSDK();
+    initCursorGlow();
 
     // Resolver Buttons
     document.getElementById('resolveSingleBtn').addEventListener('click', resolveSingleUrl);
