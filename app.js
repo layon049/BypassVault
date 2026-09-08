@@ -517,7 +517,6 @@ function copyAllBatch() {
 // CONFIGURACIÓN DE PAGO (PAYPAL Y TARJETA)
 // ==========================================
 const PAYPAL_PAYMENT_URL = "https://www.paypal.com/ncp/payment/Z2NDNVYKJBBKY";
-const PAYPAL_BUSINESS_EMAIL = "layonnerdavida@gmail.com";
 const PRODUCT_PRICE = "2.99";
 const PAYPAL_CLIENT_ID = ""; // Opcional si se usa SDK directo
 
@@ -549,18 +548,23 @@ function verifyReceiptTx() {
         return;
     }
 
+    // Obtener cantidad de paquetes seleccionados
+    const qtySelect = document.getElementById('txVerifyQty');
+    const qty = qtySelect ? (parseInt(qtySelect.value, 10) || 1) : 1;
+    const creditsToAdd = qty * PRO_CREDITS_PER_PACK;
+
     processedTx.push(tx);
     localStorage.setItem('bv_processed_tx', JSON.stringify(processedTx));
 
-    appState.proCredits += PRO_CREDITS_PER_PACK;
+    appState.proCredits += creditsToAdd;
     appState.isPro = true;
     saveState();
     updateUI();
     closePaymentModal();
     input.value = '';
 
-    appendLog('success', `🎉 ¡Pago de ${PRODUCT_PRICE}€ acreditado con éxito (Recibo: ${tx})! +20 Créditos PRO activados.`);
-    showToast(`🎉 ¡Pago verificado! +20 Créditos PRO activados.`, 'fa-crown');
+    appendLog('success', `🎉 ¡Pago de ${qty} paquete(s) acreditado (Recibo: ${tx})! +${creditsToAdd} Créditos PRO activados.`);
+    showToast(`🎉 ¡Pago verificado! +${creditsToAdd} Créditos PRO activados.`, 'fa-crown');
 }
 
 // Detección automática al volver de PayPal con comprobante real de transacción
@@ -580,15 +584,29 @@ function checkPaymentReturn() {
                 window.history.replaceState({}, document.title, cleanUrl);
                 return;
             }
+
+            // Detectar cantidad desde los parámetros de PayPal (si los envía)
+            const rawQty = urlParams.get('qty') || urlParams.get('quantity') || urlParams.get('count') || urlParams.get('item_quantity');
+            const rawAmt = urlParams.get('amt') || urlParams.get('amount') || urlParams.get('mc_gross');
+
+            let qty = 1;
+            if (rawQty && parseInt(rawQty, 10) > 0) {
+                qty = parseInt(rawQty, 10);
+            } else if (rawAmt && parseFloat(rawAmt) > 0) {
+                qty = Math.max(1, Math.round(parseFloat(rawAmt) / 2.99));
+            }
+
+            const creditsToAdd = qty * PRO_CREDITS_PER_PACK;
+
             processedTx.push(txId);
             localStorage.setItem('bv_processed_tx', JSON.stringify(processedTx));
 
-            appState.proCredits += PRO_CREDITS_PER_PACK;
+            appState.proCredits += creditsToAdd;
             appState.isPro = true;
             saveState();
             updateUI();
-            appendLog('success', `🎉 ¡Pago de ${PRODUCT_PRICE}€ validado por PayPal! +20 Créditos PRO activados.`);
-            showToast(`🎉 ¡Pago de ${PRODUCT_PRICE}€ completado! +20 Créditos PRO activados.`, 'fa-crown');
+            appendLog('success', `🎉 ¡Pago de ${qty} paquete(s) validado por PayPal! +${creditsToAdd} Créditos PRO activados.`);
+            showToast(`🎉 ¡Pago de ${qty} paquete(s) completado! +${creditsToAdd} Créditos PRO activados.`, 'fa-crown');
             
             // Limpiar los parámetros de la URL sin recargar
             const cleanUrl = window.location.origin + window.location.pathname;
@@ -653,8 +671,8 @@ function initPayPalButtons() {
                 updateUI();
                 closePaymentModal();
 
-                appendLog('success', `🎉 ¡Pago de $${PRODUCT_PRICE} recibido con éxito! (ID: ${data.orderID})`);
-                showToast(`¡Pago de $${PRODUCT_PRICE} completado! +20 Créditos PRO activados.`, 'fa-crown');
+                appendLog('success', `🎉 ¡Pago de ${PRODUCT_PRICE}€ recibido con éxito! (ID: ${data.orderID})`);
+                showToast(`¡Pago de ${PRODUCT_PRICE}€ completado! +20 Créditos PRO activados.`, 'fa-crown');
             });
         },
         onError: function(err) {

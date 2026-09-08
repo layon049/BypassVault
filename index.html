@@ -442,8 +442,15 @@
                 <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
                     ¿Ya pagaste en PayPal? Ingresa el ID de transacción de tu recibo para activar:
                 </p>
-                <div style="display: flex; gap: 8px; justify-content: center; align-items: center; max-width: 320px; margin: 0 auto;">
-                    <input type="text" id="txVerifyInput" placeholder="ID de Transacción" style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 9px 12px; color: #fff; font-size: 12.5px; font-family: var(--font-mono); text-transform: uppercase;">
+                <div style="display: flex; gap: 8px; justify-content: center; align-items: center; max-width: 360px; margin: 0 auto; flex-wrap: wrap;">
+                    <input type="text" id="txVerifyInput" placeholder="ID de Transacción" style="flex: 1; min-width: 140px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 9px 12px; color: #fff; font-size: 12.5px; font-family: var(--font-mono); text-transform: uppercase;">
+                    <select id="txVerifyQty" style="background: rgba(12, 17, 34, 0.95); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 9px 8px; color: #fff; font-size: 12px; font-family: var(--font-sans); cursor: pointer;">
+                        <option value="1">1 Pack (20)</option>
+                        <option value="2">2 Packs (40)</option>
+                        <option value="3">3 Packs (60)</option>
+                        <option value="4">4 Packs (80)</option>
+                        <option value="5">5 Packs (100)</option>
+                    </select>
                     <button type="button" onclick="verifyReceiptTx()" style="background: var(--success); color: #000; font-weight: 800; border: none; border-radius: var(--radius-sm); padding: 9px 16px; cursor: pointer; font-size: 12.5px;">
                         Activar
                     </button>
