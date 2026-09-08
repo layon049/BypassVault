@@ -104,25 +104,6 @@ BypassVault/
 
 ---
 
-## 🚀 Despliegue en GitHub Pages (Serverless)
-
-La arquitectura de BypassVault es 100% estática y client-side, lo que permite alojarla de forma gratuita y con disponibilidad del 99.9% en **GitHub Pages**:
-
-1. Sube los archivos a la rama `main` de tu repositorio:
-   ```bash
-   git add .
-   git commit -m "BypassVault v2.0 Cyberpunk Release"
-   git push origin main
-   ```
-2. En GitHub, ve a **Settings** > **Pages**.
-3. En la sección **Build and deployment**:
-   - **Source**: `Deploy from a branch`
-   - **Branch**: `main` / `root`
-4. Guarda los cambios. Tu web estará operativa de inmediato en:  
-   `https://layon049.github.io/BypassVault/`
-
----
-
 ## ⚖️ Aviso Legal
 
 *BypassVault es una herramienta web orientada a la productividad, automatización y accesibilidad. Los usuarios son los únicos responsables de los enlaces que decidan procesar y del cumplimiento de las leyes de propiedad intelectual y términos de servicio de los sitios de destino.*
