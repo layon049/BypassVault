@@ -47,13 +47,6 @@ Esta versión representa una evolución completa tanto a nivel visual como en in
     - 🔗 Enlaces resueltos
     - ⏱️ Tiempo estimado ahorrado
 * 💳 **Pasarela de Pago Oficial PayPal Hosted Checkout (2.99€ EUR):**
-  - Integración mediante enlace oficial No-Code de PayPal ([`Z2NDNVYKJBBKY`](https://www.paypal.com/ncp/payment/Z2NDNVYKJBBKY)).
-  - Cobro directo en **Euros (2.99€)** con soporte para tarjetas de débito/crédito (Visa, Mastercard, American Express) y saldo PayPal.
-  - Sistema de **validación de recibos** mediante ID de Transacción (`verifyReceiptTx`) y retorno automático sin recargar la página.
-* 🔍 **SEO & Google Search Console:**
-  - Verificación oficial para indexación orgánica mediante metaetiqueta y archivo token `googlea756ccce665a0d67.html`.
-  - Rastreado con éxito por Googlebot con código `200 OK`.
-
 ---
 
 ## ⚡ Funciones Principales
