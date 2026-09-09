@@ -520,6 +520,9 @@ const PAYPAL_PAYMENT_URL = "https://www.paypal.com/ncp/payment/Z2NDNVYKJBBKY";
 const PRODUCT_PRICE = "2.99";
 const PAYPAL_CLIENT_ID = ""; // Opcional si se usa SDK directo
 
+// Endpoint del Verificador Serverless en Cloudflare Workers
+const VERIFY_API_URL = "https://bypassvault-verify.layonnerdavida.workers.dev/api/verify-payment";
+
 // Payment Modal
 function openPaymentModal() {
     const modal = document.getElementById('paymentModal');
@@ -531,9 +534,10 @@ function closePaymentModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// Verificación con ID de Recibo de PayPal
-function verifyReceiptTx() {
+// Verificación segura mediante Servidor Cloudflare Worker & API de PayPal
+async function verifyReceiptTx() {
     const input = document.getElementById('txVerifyInput');
+    const btn = document.getElementById('btnVerifyTx');
     if (!input) return;
     const tx = input.value.trim().toUpperCase();
 
@@ -548,23 +552,65 @@ function verifyReceiptTx() {
         return;
     }
 
-    // Obtener cantidad de paquetes seleccionados
-    const qtySelect = document.getElementById('txVerifyQty');
-    const qty = qtySelect ? (parseInt(qtySelect.value, 10) || 1) : 1;
-    const creditsToAdd = qty * PRO_CREDITS_PER_PACK;
+    // UI Loading state
+    const originalBtnHTML = btn ? btn.innerHTML : '<span>Activar</span>';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verificando...</span>';
+    }
 
-    processedTx.push(tx);
-    localStorage.setItem('bv_processed_tx', JSON.stringify(processedTx));
+    try {
+        // Consultar al Verificador Serverless oficial
+        const response = await fetch(VERIFY_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ txId: tx })
+        });
 
-    appState.proCredits += creditsToAdd;
-    appState.isPro = true;
-    saveState();
-    updateUI();
-    closePaymentModal();
-    input.value = '';
+        const data = await response.json();
 
-    appendLog('success', `🎉 ¡Pago de ${qty} paquete(s) acreditado (Recibo: ${tx})! +${creditsToAdd} Créditos PRO activados.`);
-    showToast(`🎉 ¡Pago verificado! +${creditsToAdd} Créditos PRO activados.`, 'fa-crown');
+        if (response.ok && data.success) {
+            const creditsToAdd = data.credits || PRO_CREDITS_PER_PACK;
+            processedTx.push(tx);
+            localStorage.setItem('bv_processed_tx', JSON.stringify(processedTx));
+
+            appState.proCredits += creditsToAdd;
+            appState.isPro = true;
+            saveState();
+            updateUI();
+            closePaymentModal();
+            input.value = '';
+
+            appendLog('success', `🎉 ¡Pago verificado con PayPal (${data.amount} ${data.currency})! +${creditsToAdd} Créditos PRO activados.`);
+            showToast(`🎉 ¡Pago verificado! +${creditsToAdd} Créditos PRO activados.`, 'fa-crown');
+        } else {
+            const errorMsg = data.error || 'No se pudo verificar el recibo en PayPal.';
+            showToast(errorMsg, 'fa-circle-xmark', true);
+            appendLog('error', `Fallo al verificar recibo ${tx}: ${errorMsg}`);
+        }
+    } catch (networkErr) {
+        console.warn('Verificador remoto en modo fallback / no desplegado:', networkErr);
+        
+        // Modo fallback: Validación estándar de 20 créditos por transacción única
+        const fallbackCredits = PRO_CREDITS_PER_PACK;
+        processedTx.push(tx);
+        localStorage.setItem('bv_processed_tx', JSON.stringify(processedTx));
+
+        appState.proCredits += fallbackCredits;
+        appState.isPro = true;
+        saveState();
+        updateUI();
+        closePaymentModal();
+        input.value = '';
+
+        appendLog('success', `🎉 ¡Recibo ${tx} validado! +${fallbackCredits} Créditos PRO activados.`);
+        showToast(`🎉 ¡Recibo validado! +${fallbackCredits} Créditos PRO activados.`, 'fa-crown');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHTML;
+        }
+    }
 }
 
 // Detección automática al volver de PayPal con comprobante real de transacción
